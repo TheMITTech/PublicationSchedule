@@ -11,13 +11,13 @@ table.year
     font-family:"Arial", Helvetica, sans-serif;
 }
 
-th.year 
+th.year
 {
     font-size:2.5em; 
     border-top:2px solid black; 
     border-bottom:2px solid black;
 }
-td.year 
+td.year
 {
     border: 1px solid black;
 }
@@ -26,6 +26,7 @@ table.month
 {
     border-collapse:collapse;
 }
+
 th.month
 {
     font-size:1.25em;
@@ -60,9 +61,8 @@ td.special
 #key td
 {
     text-align:left;
-    padding-top:1em;
-    padding-bottom:1em;
     text-transform:capitalize;
+    vertical-align:middle;
 }
 #keycell
 {
@@ -72,9 +72,13 @@ td.special
 }
 #issuekey
 {
+    display:inline;
+    font-size:2em;
     color:#C0C0C0;
 }
 #specialkey
 {
+    display:inline;
+    font-size:2em;
     color:#7E0308;
 }

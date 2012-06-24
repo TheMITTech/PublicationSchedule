@@ -3,7 +3,7 @@
 # File Name: adscal.py
 # 
 # Current owner: Greg Steinbrecher (steinbrecher@alum.mit.edu)
-# Last Modified Time-stamp: <2012-06-24 14:54:26 gstein>
+# Last Modified Time-stamp: <2012-06-24 18:12:39 gstein>
 # 
 # Created by: Greg Steinbrecher (steinbrecher@alum.mit.edu)
 # Created on: 2012-06-24 (Sunday, June 24th, 2012)
@@ -31,25 +31,64 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
 
         self.day_name = calendar._localized_day('%A')
         self.day_abbr = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-        self.key_cell = self.make_key_cell()
 
     def make_key_cell(self):
         out = []
         app = out.append
 
         app('<td id="keycell">\n')
-
         app('<table id="key">')
-        app('<tr><td id="issuekey">')
-        app('&#9632;')
-        app('</td>\n<td>issue dates</td></tr>')
-        app('<tr><td id="specialkey">')
-        app('&#9632;')
-        app('</td>\n<td>special issues</td></tr>')
+        app('<tr><td>')
+        app('<span id="issuekey">&#9632;</span>')
+        app('&nbsp;issue dates</td></tr>')
+        app('<tr><td>')
+        app('<span id="specialkey">&#9632;</span>')
+        app('&nbsp;special issues</td></tr>')
         
         app('</table>\n</td>')
         return ''.join(out)
         
+
+    def formatarb(self, start_year, start_month, stop_year, stop_month, width=2):
+        out = []
+        app = out.append
+        width = int(max(width,1))
+        
+        app(self.year_table_header)
+        app('\n<tr>\n')
+
+        for year in xrange(start_year, stop_year+1):
+            app('<tr class="year"><th colspan="%d" class="year">%s</th></tr>' % (width, year))
+            app('\n')
+            if year == start_year:
+                app(self.make_key_cell())
+                col = 2 # Column state tracker
+                first_month = start_month
+            else:
+                first_month = 1
+                col = 1
+
+            if year == stop_year:
+                final_month = stop_month
+            else:
+                final_month = 12
+                
+            for month in xrange(first_month, final_month+1):
+                if col == 2:
+                    app('\n<td class="year">')
+                    app(self.formatmonth(year, month, withyear=False))
+                    app('</td>\n</tr>')
+                    col = 1
+                else:
+                    app('<tr>\n<td class="year">')
+                    app(self.formatmonth(year,month, withyear=False))
+                    app('</td>')
+                    col = 2
+
+            if col == 2:
+                app('<td></td>\n</tr>')
+
+        return ''.join(out)
 
     def formatyear(self, year, start_month=1, end_month=12, width=2):
         """Returns a multiline string containing an HTML table of tables
@@ -140,22 +179,32 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
             css_class = '%s%s%s' % ('month ', self.cssclasses[week_day], css_class)
             return '<td class="%s">%d</td>' % (css_class, day)
     
-    
+    def read_date_file(self, date_file):
+        for line in open(date_file, 'r-'):
+            (year, month, day) = [int(x) for x in line.strip().split('-')]
+            date = dt.date(year, month, day)
+            if not self.pub_dates.has_key(date):
+                self.pub_dates[date] = 'issue'
+        
         
             
 
 
 if __name__ == '__main__':
-    pub_dates = {dt.date(2012, 6, 8): 'special',
-                 dt.date(2012, 6, 13): 'issue',
-                 }
-    ads_cal = AdsHTMLCalendar(6, pub_dates)
-
+    special_issues = {dt.date(2012, 6, 8): 'special',
+                      dt.date(2012, 8, 24): 'special',
+                      dt.date(2012, 8, 28): 'special',
+                      dt.date(2012, 8, 31): 'special',
+                      }
+    ads_cal = AdsHTMLCalendar(6, special_issues)
+    ads_cal.read_date_file('pubdates.txt')
     print '<html>\n<head>'
     print '<link rel="stylesheet" type="text/css" href="adscalstyle.css"'
     print '</head>'
     print '<title>Test Ads Calendar</title>'
     print '<body>'
     #print ads_cal.formatmonth(2012, 6, False)
-    print ads_cal.formatyear(2012, start_month=1, width=2)
+    print ads_cal.formatarb(start_year=2012, start_month=2,
+                            stop_year=2013, stop_month=4, width=2)
     print '</body>\n</html>'
+
