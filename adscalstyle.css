@@ -1,0 +1,80 @@
+.year 
+{
+    vertical-align:top;
+    padding: 0px
+}
+
+table.year 
+{
+    border-collapse: collapse; 
+    border:1px solid black;
+    font-family:"Arial", Helvetica, sans-serif;
+}
+
+th.year 
+{
+    font-size:2.5em; 
+    border-top:2px solid black; 
+    border-bottom:2px solid black;
+}
+td.year 
+{
+    border: 1px solid black;
+}
+
+table.month
+{
+    border-collapse:collapse;
+}
+th.month
+{
+    font-size:1.25em;
+    text-align:center;
+    background-color:#E0E0E0;
+    padding:0.25em;
+}
+td.month 
+{
+    text-align:center;
+    padding:0.25em;
+}
+
+td.issue 
+{
+    background-color:#C0C0C0;
+}
+
+td.special 
+{
+    background-color:#7E0308; 
+    color:#FFFFFF;
+}
+
+#key
+{
+    width: 75%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#key td
+{
+    text-align:left;
+    padding-top:1em;
+    padding-bottom:1em;
+    text-transform:capitalize;
+}
+#keycell
+{
+    vertical-align:middle;
+    margin-left:auto;
+    margin-right:auto;
+}
+#issuekey
+{
+    color:#C0C0C0;
+}
+#specialkey
+{
+    color:#7E0308;
+}
