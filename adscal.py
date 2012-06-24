@@ -3,7 +3,7 @@
 # File Name: adscal.py
 # 
 # Current owner: Greg Steinbrecher (steinbrecher@alum.mit.edu)
-# Last Modified Time-stamp: <2012-06-24 18:12:39 gstein>
+# Last Modified Time-stamp: <2012-06-24 19:32:02 gstein>
 # 
 # Created by: Greg Steinbrecher (steinbrecher@alum.mit.edu)
 # Created on: 2012-06-24 (Sunday, June 24th, 2012)
@@ -20,7 +20,7 @@ import calendar
 import datetime as dt
 
 class AdsHTMLCalendar(calendar.HTMLCalendar):
-    def __init__(self, firstweekday, pub_dates):
+    def __init__(self, firstweekday, pub_dates={}):
 
         super(AdsHTMLCalendar, self).__init__(firstweekday)
 
@@ -29,10 +29,54 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
         self.year_table_header = '<table class="year">'
         self.month_table_header = '<table class="month">'
 
-        self.day_name = calendar._localized_day('%A')
         self.day_abbr = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
+    def read_date_file(self, date_file):
+        """Read file with list of dates and generate dictionary
+        """
+        for line in open(date_file, 'r-'):
+            s = line.strip().split('/')
+            date_str = s[0]
+            
+            if len(s) == 2:
+                kind = s[1]
+            else:
+                kind = 'issue'
+                
+            (year, month, day) = [int(x) for x in date_str.split('-')]
+            date = dt.date(year, month, day)
+            if not self.pub_dates.has_key(date):
+                self.pub_dates[date] = kind
+
+    def date_list(self):
+        """Prints the current date list in the format it likes to read it. 
+        
+        In conjunction with the add_tues_fri method, makes it easy to generate
+        a text file with too many days, remove the days we aren't
+        publishimg and reload the modified text file. Way faster than typing
+        them all in by hand. 
+        """
+        out = []
+        for key in sorted(self.pub_dates.iterkeys()):
+            (year, month, day) = (key.year, key.month, key.day)
+            out.append('%s-%s-%s/%s' % (year, month, day, self.pub_dates[key]))
+            out.append('\n')
+        return ''.join(out)
+    
+    def add_tues_fri(self, year, month):
+        """Add all tuesdays and fridays in a given month to the calendar.
+        """
+        weeks = self.monthdays2calendar(year, month)
+        for week in weeks:
+            for (month_day, week_day) in week: 
+                if month_day > 0:
+                    if (week_day == 1) or (week_day == 4):
+                        self.pub_dates[dt.date(year, month, month_day)] = 'issue'
+                
+
     def make_key_cell(self):
+        """Makes the "Issue/Special Issue" key to be put in the upper left cell.
+        """
         out = []
         app = out.append
 
@@ -48,8 +92,10 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
         app('</table>\n</td>')
         return ''.join(out)
         
-
     def formatarb(self, start_year, start_month, stop_year, stop_month, width=2):
+        """Returns a multiline string containing the full HTML table of this
+        publication schedule.
+        """
         out = []
         app = out.append
         width = int(max(width,1))
@@ -87,7 +133,7 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
 
             if col == 2:
                 app('<td></td>\n</tr>')
-
+        app('</table>')
         return ''.join(out)
 
     def formatyear(self, year, start_month=1, end_month=12, width=2):
@@ -169,7 +215,8 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
                                              self.day_abbr[day])
 
     def formatday(self, day, week_day, css_class=''):
-        # Pad with space if neccesary
+        """Slight modification of built in method to handle adding CSS to a day
+        """
         if css_class != '':
             if css_class[0] != ' ': css_class = ' %s' % css_class
             
@@ -179,32 +226,16 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
             css_class = '%s%s%s' % ('month ', self.cssclasses[week_day], css_class)
             return '<td class="%s">%d</td>' % (css_class, day)
     
-    def read_date_file(self, date_file):
-        for line in open(date_file, 'r-'):
-            (year, month, day) = [int(x) for x in line.strip().split('-')]
-            date = dt.date(year, month, day)
-            if not self.pub_dates.has_key(date):
-                self.pub_dates[date] = 'issue'
         
         
             
 
 
 if __name__ == '__main__':
-    special_issues = {dt.date(2012, 6, 8): 'special',
-                      dt.date(2012, 8, 24): 'special',
-                      dt.date(2012, 8, 28): 'special',
-                      dt.date(2012, 8, 31): 'special',
-                      }
-    ads_cal = AdsHTMLCalendar(6, special_issues)
+    ads_cal = AdsHTMLCalendar(6)
     ads_cal.read_date_file('pubdates.txt')
-    print '<html>\n<head>'
-    print '<link rel="stylesheet" type="text/css" href="adscalstyle.css"'
-    print '</head>'
-    print '<title>Test Ads Calendar</title>'
-    print '<body>'
-    #print ads_cal.formatmonth(2012, 6, False)
-    print ads_cal.formatarb(start_year=2012, start_month=2,
-                            stop_year=2013, stop_month=4, width=2)
-    print '</body>\n</html>'
+    
+    print '<link rel="stylesheet" type="text/css" href="adscalstyle.css">'
+    print ads_cal.formatarb(start_year=2012, start_month=6,
+                            stop_year=2013, stop_month=8, width=2)
 
