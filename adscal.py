@@ -3,7 +3,7 @@
 # File Name: adscal.py
 # 
 # Current owner: Greg Steinbrecher (steinbrecher@alum.mit.edu)
-# Last Modified Time-stamp: <2012-06-24 19:32:02 gstein>
+# Last Modified Time-stamp: <2013-04-20 16:47:51 gstein>
 # 
 # Created by: Greg Steinbrecher (steinbrecher@alum.mit.edu)
 # Created on: 2012-06-24 (Sunday, June 24th, 2012)
@@ -233,9 +233,10 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
 
 if __name__ == '__main__':
     ads_cal = AdsHTMLCalendar(6)
+
     ads_cal.read_date_file('pubdates.txt')
     
     print '<link rel="stylesheet" type="text/css" href="adscalstyle.css">'
-    print ads_cal.formatarb(start_year=2012, start_month=6,
-                            stop_year=2013, stop_month=8, width=2)
+    print ads_cal.formatarb(start_year=2013, start_month=4,
+                            stop_year=2014, stop_month=6, width=2)
 
