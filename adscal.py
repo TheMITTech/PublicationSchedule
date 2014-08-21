@@ -3,7 +3,7 @@
 # File Name: adscal.py
 # 
 # Current owner: Greg Steinbrecher (steinbrecher@alum.mit.edu)
-# Last Modified Time-stamp: <2014-08-21 12:39:41 gstein>
+# Last Modified Time-stamp: <2014-08-21 12:44:07 gstein>
 # 
 # Created by: Greg Steinbrecher (steinbrecher@alum.mit.edu)
 # Created on: 2012-06-24 (Sunday, June 24th, 2012)
@@ -245,7 +245,7 @@ if __name__ == '__main__':
     ## Block to generate HTML ##
     ads_cal.read_date_file('pubdates.txt')
     
-    print '<link rel="stylesheet" type="text/css" href="adscalstyle.css">'
+    print '<link rel="stylesheet" type="text/css" href="/css/adscalstyle.css">'
     print ads_cal.formatarb(start_year=2014, start_month=6,
                             stop_year=2015, stop_month=6, width=2)
 
