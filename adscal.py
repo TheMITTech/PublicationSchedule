@@ -3,7 +3,7 @@
 # File Name: adscal.py
 # 
 # Current owner: Greg Steinbrecher (steinbrecher@alum.mit.edu)
-# Last Modified Time-stamp: <2014-08-21 12:44:07 gstein>
+# Last Modified Time-stamp: <2015-02-03 20:06:48 gstein>
 # 
 # Created by: Greg Steinbrecher (steinbrecher@alum.mit.edu)
 # Created on: 2012-06-24 (Sunday, June 24th, 2012)
@@ -18,6 +18,7 @@ CSS class.
 
 import calendar
 import datetime as dt
+import argparse
 
 class AdsHTMLCalendar(calendar.HTMLCalendar):
     def __init__(self, firstweekday, pub_dates={}):
@@ -227,25 +228,44 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
             return '<td class="%s">%d</td>' % (css_class, day)
     
         
-        
-            
+def print_dates(startMonth, startYear, endMonth, endYear):        
+    adsCal = AdsHTMLCalendar(6)
+    for year in xrange(startYear, endYear+1):
+        if year != endYear:
+            lastMonth = 12
+        else:
+            lastMonth = endMonth
+        for month in xrange(startMonth, lastMonth+1):
+            adsCal.add_tues_fri(year, month)
+    print adsCal.date_list()
 
-
-if __name__ == '__main__':
-    ads_cal = AdsHTMLCalendar(6)
-
-    
-    ## Block to generate ads dates ##
-    # for month in range(7,13):
-    #     ads_cal.add_tues_fri(2014, month)
-    # for month in range(1,6):
-    #     ads_cal.add_tues_fri(2015, month)
-    # print ads_cal.date_list()
-
-    ## Block to generate HTML ##
-    ads_cal.read_date_file('pubdates.txt')
+def print_html(startMonth, startYear, endMonth, endYear):
+    adsCal = AdsHTMLCalendar(6)
+    adsCal.read_date_file('pubdates.txt')
     
     print '<link rel="stylesheet" type="text/css" href="/css/adscalstyle.css">'
-    print ads_cal.formatarb(start_year=2014, start_month=6,
+    print adsCal.formatarb(start_year=2014, start_month=6,
                             stop_year=2015, stop_month=6, width=2)
+    
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Ads Calendar Tool')
+    parser.add_argument('-s', '--start-month', metavar='startmonth', 
+                        help="Starting month", type=int, required=True)
+    parser.add_argument('-e', '--end-month', metavar='endmonth', 
+                        help="Ending month", type=int, required=True)
+    parser.add_argument('-S', '--start-year', metavar='startyear', 
+                        help="Starting year", type=int, required=True)
+    parser.add_argument('-E', '--end-year', metavar='endyear', 
+                        help="Ending year (if not included, assumed same as starting)")
+    parser.add_argument('-d', '--print-dates', action='store_true',
+                        help="Print list of dates in date range rather than calendar HTML")
+    args = parser.parse_args()
+    endYear = args.end_year
+    if endYear is None:
+        endYear = args.start_year
+    if args.print_dates:
+        print_dates(args.start_month, args.start_year, args.end_month, endYear)
+    else:
+        print_html(args.start_month, args.start_year, args.end_month, endYear)
+    
 
