@@ -269,8 +269,8 @@ def print_html(startMonth, startYear, endMonth, endYear):
     adsCal.read_date_file('pubdates.txt')
     
     print '<link rel="stylesheet" type="text/css" href="/css/adscalstyle.css">'
-    print adsCal.formatarb(start_year=2014, start_month=6,
-                            stop_year=2015, stop_month=6, width=2)
+    print adsCal.formatarb(start_year=startYear, start_month=startMonth,
+                            stop_year=endYear, stop_month=endMonth, width=2)
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Ads Calendar Tool')
@@ -281,7 +281,7 @@ if __name__ == '__main__':
     parser.add_argument('-S', '--start-year', metavar='startyear', 
                         help="Starting year", type=int, required=True)
     parser.add_argument('-E', '--end-year', metavar='endyear', 
-                        help="Ending year (if not included, assumed same as starting)")
+                        help="Ending year (if not included, assumed same as starting)", type=int)
     parser.add_argument('-d', '--print-dates', action='store_true',
                         help="Print list of dates in date range rather than calendar HTML")
     parser.add_argument('--no-tuesdays', action='store_true',
