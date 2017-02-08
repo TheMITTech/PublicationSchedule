@@ -73,6 +73,15 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
                     if (week_day == 1):
                         self.pub_dates[dt.date(year, month, month_day)] = 'issue'
 
+    def add_thurs(self, year, month):
+        """ Add all Tuesdays in a given month to the calendar"""
+        weeks = self.monthdays2calendar(year, month)
+        for week in weeks:
+            for (month_day, week_day) in week: 
+                if month_day > 0:
+                    if (week_day == 3):
+                        self.pub_dates[dt.date(year, month, month_day)] = 'issue'
+
     def add_fri(self, year, month):
         """ Add all Fridays in a given month to the calendar"""
         weeks = self.monthdays2calendar(year, month)
@@ -81,7 +90,7 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
                 if month_day > 0:
                     if (week_day == 4):
                         self.pub_dates[dt.date(year, month, month_day)] = 'issue'
-    
+
     def add_tues_fri(self, year, month):
         """Add all tuesdays and fridays in a given month to the calendar.
         """
@@ -246,7 +255,7 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
             return '<td class="%s">%d</td>' % (css_class, day)
     
         
-def print_dates(startMonth, startYear, endMonth, endYear, tues=True, fri=True):        
+def print_dates(startMonth, startYear, endMonth, endYear, tues=True, fri=True, thurs=True):
     adsCal = AdsHTMLCalendar(6)
     for year in xrange(startYear, endYear+1):
         if year != endYear:
@@ -254,12 +263,16 @@ def print_dates(startMonth, startYear, endMonth, endYear, tues=True, fri=True):
         else:
             lastMonth = endMonth
         for month in xrange(startMonth, lastMonth+1):
+            if thurs:
+                adsCal.add_thurs(year, month)
             if tues and fri:
                 adsCal.add_tues_fri(year, month)
             elif tues:
                 adsCal.add_tues(year, month)
             elif fri:
                 adsCal.add_fri(year, month)
+            elif thurs:
+                pass
             else:
                 raise ValueError("Must have one of Tuesdays or Fridays selected")
     print adsCal.date_list()
@@ -286,6 +299,8 @@ if __name__ == '__main__':
                         help="Print list of dates in date range rather than calendar HTML")
     parser.add_argument('--no-tuesdays', action='store_true',
                         help="Don't include Tuesdays on the calendar (only applies to printing dates)")
+    parser.add_argument('--no-thursdays', action='store_true',
+                        help="Don't include Thursdays on the calendar (only applies to printing dates)")
     parser.add_argument('--no-fridays', action='store_true',
                         help="Don't include Fridays on the calendar (only applies to printing dates)")
 
@@ -295,7 +310,7 @@ if __name__ == '__main__':
         endYear = args.start_year
     if args.print_dates:
         print_dates(args.start_month, args.start_year, args.end_month, endYear, 
-                    tues=(not args.no_tuesdays), fri=(not args.no_fridays))
+                    tues=(not args.no_tuesdays), fri=(not args.no_fridays), thurs=(not args.no_thursdays))
     else:
         print_html(args.start_month, args.start_year, args.end_month, endYear)
     
