@@ -85,6 +85,7 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
         app = out.append
 
         app('<td id="keycell">\n')
+        app('<!-- ))))) **GENERATED CODE, DO NOT EDIT CALENDAR BY HAND!!!** ((((( -->\n')
         app('<table id="key">')
         app('<tr><td>')
         app('<span id="issuekey">&#9632;</span>')
@@ -183,6 +184,12 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
         app('\n')
         app(self.formatweekheader())
         app('\n')
+        app('<!-- )))))                                                     ((((( -->')
+        app('\n')
+        app('<!-- ))))) **GENERATED CODE, DO NOT EDIT CALENDAR BY HAND!!!** ((((( -->')
+        app('\n')
+        app('<!-- )))))                                                     ((((( -->')
+        app('\n')
 
         # monthdays2calendar returns list of weeks where each week is a list of
         # (month_day, week_day) pairs with month_day=0 for any day of a given
@@ -247,8 +254,15 @@ def print_html(startMonth, startYear, endMonth, endYear):
     adsCal.read_date_file('pubdates.txt')
 
     print '<link rel="stylesheet" type="text/css" href="/css/adscalstyle.css">'
+    print '<!-- ************************************************** -->';
+    print '<!-- GENERATED CODE DO NOT EDIT CALANDAR HTML BY HAND!!! -->';
+    print '<!-- ************************************************** -->';
+    print '<!-- BEGIN GENERATED CODE.... -->';
+    print '<!-- ************************************************** -->';
     print adsCal.formatarb(start_year=startYear, start_month=startMonth,
                             stop_year=endYear, stop_month=endMonth, width=2)
+    print '<!-- ************************************************** -->';
+    print '<!-- END GENERATED CODE! -->';
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Ads Calendar Tool')
