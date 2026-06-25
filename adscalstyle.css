@@ -82,3 +82,18 @@ td.special
     font-size:2em;
     color:#7E0308;
 }
+
+/* Additions for 4-column side-by-side layout */
+.calendar-flex-container
+{
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Ensures the tables align at the top */
+    gap: 40px; /* Space between the 2026 and 2027 blocks */
+    flex-wrap: wrap; /* Allows the years to stack vertically if viewed on a small mobile screen */
+}
+
+.year-column
+{
+    flex: 0 1 auto;
+}
