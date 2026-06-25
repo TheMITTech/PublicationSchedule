@@ -12,6 +12,10 @@
 # Modified on: 2017-11-08 (Wednesday, November 8, 2017)
 # Modification comments: We no longer publish Tues/Fri ==> we do Thurs only + special issues.
 #
+# Modified by: Conrad Straden (cstraden@mit.edu, cstraden@alum.mit.edu eventually)
+# Modified on: 2026-06-25 (Thursday, June 25, 2026)
+# Modification comments: Updated to Python 3 and added multi year capabilities.
+#
 ###############################################################################
 """Module to output advertising calendar for The Tech in HTML format.
 
@@ -39,7 +43,7 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
     def read_date_file(self, date_file):
         """Read file with list of dates and generate dictionary
         """
-        for line in open(date_file, 'r-'):
+        for line in open(date_file, 'r'):
             s = line.strip().split('/')
             date_str = s[0]
 
@@ -50,7 +54,7 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
 
             (year, month, day) = [int(x) for x in date_str.split('-')]
             date = dt.date(year, month, day)
-            if not self.pub_dates.has_key(date):
+            if date not in self.pub_dates:
                 self.pub_dates[date] = kind
 
     def date_list(self):
@@ -62,7 +66,7 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
         them all in by hand.
         """
         out = []
-        for key in sorted(self.pub_dates.iterkeys()):
+        for key in sorted(self.pub_dates.keys()):
             (year, month, day) = (key.year, key.month, key.day)
             out.append('%s-%s-%s/%s' % (year, month, day, self.pub_dates[key]))
             out.append('\n')
@@ -99,45 +103,52 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
 
     def formatarb(self, start_year, start_month, stop_year, stop_month, width=2):
         """Returns a multiline string containing the full HTML table of this
-        publication schedule.
+        publication schedule. Handles academic year crossovers.
         """
         out = []
         app = out.append
-        width = int(max(width,1))
+        width = int(max(width, 1))
 
         app(self.year_table_header)
         app('\n<tr>\n')
 
-        for year in xrange(start_year, stop_year+1):
-            app('<tr class="year"><th colspan="%d" class="year">%s</th></tr>' % (width, year))
-            app('\n')
-            if year == start_year:
-                app(self.make_key_cell())
-                col = 2 # Column state tracker
-                first_month = start_month
-            else:
-                first_month = 1
-                col = 1
+        current_year = start_year
+        current_month = start_month
+        total_months = (stop_year - start_year) * 12 + (stop_month - start_month) + 1
 
-            if year == stop_year:
-                final_month = stop_month
-            else:
-                final_month = 12
+        col = 1
+        last_tracked_year = None
 
-            for month in xrange(first_month, final_month+1):
-                if col == 2:
-                    app('\n<td class="year">')
-                    app(self.formatmonth(year, month, withyear=False))
-                    app('</td>\n</tr>')
-                    col = 1
-                else:
-                    app('<tr>\n<td class="year">')
-                    app(self.formatmonth(year,month, withyear=False))
-                    app('</td>')
-                    col = 2
+        for i in range(total_months):
+            # Print a year header row whenever the year changes
+            if current_year != last_tracked_year:
+                app('<tr class="year"><th colspan="%d" class="year">%s</th></tr>' % (width, current_year))
+                app('\n')
+                if i == 0:
+                    app(self.make_key_cell())
+                    col = 2  # Account for key cell space
+                last_tracked_year = current_year
 
+            # Handle column wrapping for the table layout
             if col == 2:
-                app('<td></td>\n</tr>')
+                app('\n<td class="year">')
+                app(self.formatmonth(current_year, current_month, withyear=False))
+                app('</td>\n</tr>')
+                col = 1
+            else:
+                app('<tr>\n<td class="year">')
+                app(self.formatmonth(current_year, current_month, withyear=False))
+                app('</td>')
+                col = 2
+
+            # Roll over month and year
+            current_month += 1
+            if current_month > 12:
+                current_month = 1
+                current_year += 1
+
+        if col == 2:
+            app('<td></td>\n</tr>')
         app('</table>')
         return ''.join(out)
 
@@ -240,29 +251,38 @@ class AdsHTMLCalendar(calendar.HTMLCalendar):
 
 def print_dates(startMonth, startYear, endMonth, endYear, tues=True, fri=True):
     adsCal = AdsHTMLCalendar(6)
-    for year in xrange(startYear, endYear+1):
-        if year != endYear:
-            lastMonth = 12
-        else:
-            lastMonth = endMonth
-        for month in xrange(startMonth, lastMonth+1):
-            adsCal.add_thurs(year,month)
-    print adsCal.date_list()
+
+    current_year = startYear
+    current_month = startMonth
+
+    # Calculate total months to iterate through
+    total_months = (endYear - startYear) * 12 + (endMonth - startMonth) + 1
+
+    for _ in range(total_months):
+        adsCal.add_thurs(current_year, current_month)
+
+        # Roll over the month and year
+        current_month += 1
+        if current_month > 12:
+            current_month = 1
+            current_year += 1
+
+    print(adsCal.date_list())
 
 def print_html(startMonth, startYear, endMonth, endYear):
     adsCal = AdsHTMLCalendar(6)
     adsCal.read_date_file('pubdates.txt')
 
-    print '<link rel="stylesheet" type="text/css" href="/css/adscalstyle.css">'
-    print '<!-- ************************************************** -->';
-    print '<!-- GENERATED CODE DO NOT EDIT CALANDAR HTML BY HAND!!! -->';
-    print '<!-- ************************************************** -->';
-    print '<!-- BEGIN GENERATED CODE.... -->';
-    print '<!-- ************************************************** -->';
-    print adsCal.formatarb(start_year=startYear, start_month=startMonth,
-                            stop_year=endYear, stop_month=endMonth, width=2)
-    print '<!-- ************************************************** -->';
-    print '<!-- END GENERATED CODE! -->';
+    print('<link rel="stylesheet" type="text/css" href="/css/adscalstyle.css">')
+    print('<!-- ************************************************** -->')
+    print('<!-- GENERATED CODE DO NOT EDIT CALANDAR HTML BY HAND!!! -->')
+    print('<!-- ************************************************** -->')
+    print('<!-- BEGIN GENERATED CODE.... -->')
+    print('<!-- ************************************************** -->')
+    print(adsCal.formatarb(start_year=startYear, start_month=startMonth,
+                            stop_year=endYear, stop_month=endMonth, width=2))
+    print('<!-- ************************************************** -->')
+    print('<!-- END GENERATED CODE! -->')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Ads Calendar Tool')
@@ -285,5 +305,3 @@ if __name__ == '__main__':
         print_dates(args.start_month, args.start_year, args.end_month, endYear)
     else:
         print_html(args.start_month, args.start_year, args.end_month, endYear)
-
-
